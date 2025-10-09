@@ -1,0 +1,6 @@
+/* Moderator-only visual for ghosted comments on frontend */
+.gcm-ghost-wrap{
+  background: var(--gcm-indicator-color, #eeeeee);
+  padding: 8px 10px;
+  border-radius: 6px;
+}

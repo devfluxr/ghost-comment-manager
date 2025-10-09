@@ -1,0 +1,48 @@
+/* Admin global */
+.gcm-wrap .gcm-sub{margin:6px 0 14px;color:#555}
+.gcm-foot{margin-top:14px}
+
+/* Cards */
+.gcm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:12px}
+.gcm-card{border-radius:14px;color:#0d1b2a;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid transparent}
+.gcm-k{font-size:12px;margin:0;opacity:.85}
+.gcm-v{font-size:28px;margin:4px 0 0 0;font-weight:800;letter-spacing:.2px}
+
+/* Distinct color themes (all different) */
+.gcm-card-blue  {background:linear-gradient(135deg,#e8f2ff,#f6fbff);border-color:#bcdcff}
+.gcm-card-green {background:linear-gradient(135deg,#e6fff4,#f4fffb);border-color:#b7f0d7}
+.gcm-card-purple{background:linear-gradient(135deg,#f1e8ff,#fbf7ff);border-color:#d2c1ff}
+.gcm-card-orange{background:linear-gradient(135deg,#fff1e3,#fff8ef);border-color:#ffd8b1}
+.gcm-card-teal  {background:linear-gradient(135deg,#e5fffb,#f5fffe);border-color:#b8f1e8}
+
+/* Table */
+.gcm-grid{margin-top:20px}
+.gcm-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #dcdcde;border-radius:14px;overflow:hidden}
+.gcm-table th,.gcm-table td{padding:12px;border-bottom:1px solid #eee}
+.gcm-table th{background:#f6f7f7;text-align:left}
+.gcm-table tr:last-child td{border-bottom:none}
+
+/* Pro features grid as colorful cards */
+.gcm-pro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
+.gcm-pro-card{position:relative;border-radius:14px;padding:18px;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid transparent;color:#0d1b2a}
+.gcm-pro-badge{position:absolute;top:10px;right:10px;background:#f0f6ff;border:1px solid #bcd3ff;border-radius:999px;padding:4px 10px;font-size:11px}
+.gcm-pro-title{margin:0;font-size:16px;font-weight:700}
+
+/* Pro color variants (all different) */
+.gcm-pro-blue   {background:linear-gradient(135deg,#e8f2ff,#f6fbff);border-color:#bcdcff}
+.gcm-pro-green  {background:linear-gradient(135deg,#e6fff4,#f4fffb);border-color:#b7f0d7}
+.gcm-pro-purple {background:linear-gradient(135deg,#f1e8ff,#fbf7ff);border-color:#d2c1ff}
+.gcm-pro-orange {background:linear-gradient(135deg,#fff1e3,#fff8ef);border-color:#ffd8b1}
+.gcm-pro-teal   {background:linear-gradient(135deg,#e5fffb,#f5fffe);border-color:#b8f1e8}
+
+/* Comments list badges */
+.column-gcmgr_status{width:160px}
+.gcm-badge{display:inline-block;background:#eef1f4;border-radius:999px;padding:2px 8px;font-size:11px;margin-right:6px;border:1px solid #d7dce1}
+.gcm-badge-ghost{background:#e9fff1;border-color:#c6f0d3}
+.gcm-badge-trusted{background:#eef2ff;border-color:#c9d1ff}
+
+/* Row actions */
+a.gcm-row-action{font-weight:600}
+
+/* Ghost tag (uses dynamic CSS var set by enqueue) */
+.gcm-ghost-tag{background:var(--gcm-indicator-color,#eeeeee);padding:2px 6px;border-radius:3px;margin-left:6px;font-size:11px}
