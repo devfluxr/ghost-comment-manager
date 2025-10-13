@@ -1,72 +1,107 @@
 <?php
-if ( ! defined('ABSPATH') ) { exit; }
+/**
+ * Uninstall cleanup for Ghost Comment Manager
+ */
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) { exit; }
 
 /**
- * Resolve cache paths in uploads/, not inside the plugin folder.
+ * Resolve cache paths in uploads/ (fallback if autoload.php is not loaded).
  */
 if ( ! function_exists( 'gcmgr_cache_paths' ) ) {
-    function gcmgr_cache_paths() : array {
-        $u = wp_upload_dir();
-        $base = trailingslashit( $u['basedir'] ) . 'ghost-comment-manager/';
-        $file = $base . 'classmap.json';
-        return [ $base, $file ];
-    }
+	function gcmgr_cache_paths() : array {
+		$u    = wp_upload_dir();
+		$base = trailingslashit( $u['basedir'] ) . 'ghost-comment-manager/';
+		$file = $base . 'classmap.json';
+		return array( $base, $file );
+	}
 }
 
-list( $gcmgr_cache_dir, $gcmgr_classmap_file ) = gcmgr_cache_paths();
+/**
+ * Per-blog cleanup.
+ */
+function gcmgr_uninstall_for_blog() : void {
+	global $wpdb;
 
-if ( ! defined('GCMGR_CACHE_DIR') )  define('GCMGR_CACHE_DIR',  $gcmgr_cache_dir);
-if ( ! defined('GCMGR_CLASSMAP_FILE') ) define('GCMGR_CLASSMAP_FILE', $gcmgr_classmap_file);
+	// Options (new + legacy)
+	delete_option( 'gcmgr_settings' );
+	delete_option( 'gcmgr_metrics' );
+	delete_option( 'gcm_settings' );
+	delete_option( 'gcm_metrics' );
 
-require_once __DIR__ . '/inc/Support/Autoloader.php';
-require_once __DIR__ . '/inc/Support/ClassmapBuilder.php';
+	// User meta (new + legacy)
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->usermeta} WHERE meta_key IN (%s,%s)",
+			'_gcmgr_trusted',
+			'_gcm_trusted'
+		)
+	);
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->usermeta} WHERE meta_key IN (%s,%s)",
+			'_gcmgr_approved_count',
+			'_gcm_approved_count'
+		)
+	);
 
-$loader = new \Devfluxr\Gcmgr\Support\Autoloader();
+	// Comment meta (new + legacy)
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->commentmeta} WHERE meta_key IN (%s,%s)",
+			'_gcmgr_ghost',
+			'_gcm_ghost'
+		)
+	);
 
-// PSR-4 map
-$psr4 = [
-    'Devfluxr\\Gcmgr\\' => plugin_dir_path(__FILE__) . 'inc',
-];
-$proInc = plugin_dir_path(__FILE__) . 'pro/inc';
-if ( is_dir( $proInc ) ) {
-    $psr4['GcmPro\\'] = $proInc;
+	// Transients (new + legacy)
+	$like_patterns = array(
+		'_transient_gcmgr_%',
+		'_transient_timeout_gcmgr_%',
+		'_transient_gcm_%',
+		'_transient_timeout_gcm_%',
+	);
+	foreach ( $like_patterns as $like ) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$like
+			)
+		);
+	}
+
+	// Remove cache in uploads/ using WP APIs
+	if ( ! function_exists( 'wp_delete_file' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+	}
+
+	list( $dir, $file ) = gcmgr_cache_paths();
+
+	// Delete the classmap file (WP-safe)
+	if ( ! empty( $file ) && file_exists( $file ) ) {
+		wp_delete_file( $file );
+	}
+
+	// Recursively delete the cache directory via WP_Filesystem
+	if ( ! function_exists( 'WP_Filesystem' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+	}
+	WP_Filesystem();
+	global $wp_filesystem;
+
+	if ( $wp_filesystem && ! empty( $dir ) && $wp_filesystem->is_dir( $dir ) ) {
+		// true = recursive, 'd' = directory
+		$wp_filesystem->delete( trailingslashit( $dir ), true, 'd' );
+	}
 }
-foreach ( $psr4 as $prefix => $dir ) {
-    $loader->addPsr4( $prefix, $dir );
-}
 
-// Load or build classmap
-$map = [];
-if ( file_exists( GCMGR_CLASSMAP_FILE ) ) {
-    $json = file_get_contents( GCMGR_CLASSMAP_FILE );
-    $arr  = json_decode( (string) $json, true );
-    if ( is_array( $arr ) ) { $map = $arr; }
+// Multisite-aware uninstall.
+if ( is_multisite() && function_exists( 'get_sites' ) && is_network_admin() ) {
+	$sites = get_sites( array( 'fields' => 'ids' ) );
+	foreach ( $sites as $blog_id ) {
+		switch_to_blog( (int) $blog_id );
+		gcmgr_uninstall_for_blog();
+		restore_current_blog();
+	}
 } else {
-    if ( ! is_dir( GCMGR_CACHE_DIR ) ) {
-        wp_mkdir_p( GCMGR_CACHE_DIR );
-    }
-    $map = \Devfluxr\Gcmgr\Support\ClassmapBuilder::build( $psr4 );
-
-    // Write cache only if uploads dir is writable
-    if ( wp_is_writable( GCMGR_CACHE_DIR ) ) {
-        if ( ! function_exists('WP_Filesystem') ) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-        }
-        WP_Filesystem();
-        global $wp_filesystem;
-        if ( $wp_filesystem ) {
-            $wp_filesystem->put_contents( GCMGR_CLASSMAP_FILE, wp_json_encode( $map ), FS_CHMOD_FILE );
-        }
-    }
-}
-
-$loader->setClassMap( $map );
-$loader->register();
-
-// Optional helpers
-$helpersDir = __DIR__ . '/inc/Functions';
-if ( is_dir( $helpersDir ) ) {
-    foreach ( glob( $helpersDir.'/*.php' ) as $helper ) {
-        require_once $helper;
-    }
+	gcmgr_uninstall_for_blog();
 }
