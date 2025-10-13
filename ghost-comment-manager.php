@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Ghost Comment Manager
  * Description: Trusted comments → auto-publish as “ghost” (mod-only flagged) until confirmed.
- * Version: 0.1.3
+ * Version: 0.1.4
  * Author: DevFluxr
  * Author URI: https://devfluxr.com/
  * Plugin URI: https://github.com/devfluxr/ghost-comment-manager
@@ -25,6 +25,7 @@ define('GCMGR_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once __DIR__ . '/autoload.php';
 
 register_activation_hook(__FILE__, function() {
+    // Legacy → new options
     $old_settings = get_option('gcm_settings', null);
     if ($old_settings !== null) {
         add_option('gcmgr_settings', $old_settings, '', 'no');
@@ -35,7 +36,6 @@ register_activation_hook(__FILE__, function() {
         add_option('gcmgr_metrics', $old_metrics, '', 'no');
         delete_option('gcm_metrics');
     }
-
     if ( get_option('gcmgr_settings', null ) === null ) {
         if ( class_exists('\\Devfluxr\\Gcmgr\\Settings\\Registry') ) {
             add_option( 'gcmgr_settings', \Devfluxr\Gcmgr\Settings\Registry::defaults(), '', 'no' );
@@ -47,25 +47,32 @@ register_activation_hook(__FILE__, function() {
         add_option( 'gcmgr_metrics', [], '', 'no' );
     }
 
-    if ( ! is_dir( GCMGR_CACHE_DIR ) ) {
-        wp_mkdir_p( GCMGR_CACHE_DIR );
-    }
-    $psr4 = ['Devfluxr\\Gcmgr\\' => plugin_dir_path(__FILE__) . 'inc'];
-    $proInc = plugin_dir_path(__FILE__) . 'pro/inc';
-    if ( is_dir( $proInc ) ) {
-        $psr4['GcmPro\\'] = $proInc;
-    }
-    $map = \Devfluxr\Gcmgr\Support\ClassmapBuilder::build( $psr4 );
+    // Ensure uploads cache dir exists; prebuild classmap (optional)
+    if ( function_exists( 'gcmgr_cache_paths' ) ) {
+        list( $dir, $file ) = gcmgr_cache_paths();
+        if ( ! is_dir( $dir ) ) {
+            wp_mkdir_p( $dir );
+        }
+        if ( wp_is_writable( $dir ) ) {
+            $psr4 = [ 'Devfluxr\\Gcmgr\\' => plugin_dir_path(__FILE__) . 'inc' ];
+            $proInc = plugin_dir_path(__FILE__) . 'pro/inc';
+            if ( is_dir( $proInc ) ) {
+                $psr4['GcmPro\\'] = $proInc;
+            }
+            $map = \Devfluxr\Gcmgr\Support\ClassmapBuilder::build( $psr4 );
 
-    if ( function_exists('wp_filesystem') === false ) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-    }
-    WP_Filesystem();
-    global $wp_filesystem;
-    if ( $wp_filesystem && $wp_filesystem->is_dir( GCMGR_CACHE_DIR ) && $wp_filesystem->is_writable( GCMGR_CACHE_DIR ) ) {
-        $wp_filesystem->put_contents( GCMGR_CLASSMAP_FILE, wp_json_encode( $map ), FS_CHMOD_FILE );
+            if ( ! function_exists('WP_Filesystem') ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            WP_Filesystem();
+            global $wp_filesystem;
+            if ( $wp_filesystem ) {
+                $wp_filesystem->put_contents( $file, wp_json_encode( $map ), FS_CHMOD_FILE );
+            }
+        }
     }
 });
+
 
 add_action('plugins_loaded', function () {
     if ( class_exists('\\Devfluxr\\Gcmgr\\Init') ) {

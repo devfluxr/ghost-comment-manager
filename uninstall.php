@@ -4,53 +4,38 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) { exit; }
 function gcmgr_uninstall_for_blog() : void {
     global $wpdb;
 
+    // Options (new + legacy)
     delete_option('gcmgr_settings');
     delete_option('gcmgr_metrics');
-    // legacy
     delete_option('gcm_settings');
     delete_option('gcm_metrics');
 
-    // user meta
+    // User meta
     $wpdb->query( $wpdb->prepare("DELETE FROM {$wpdb->usermeta} WHERE meta_key IN (%s,%s)", '_gcmgr_trusted', '_gcm_trusted') );
     $wpdb->query( $wpdb->prepare("DELETE FROM {$wpdb->usermeta} WHERE meta_key IN (%s,%s)", '_gcmgr_approved_count', '_gcm_approved_count') );
 
-    // comment meta
+    // Comment meta
     $wpdb->query( $wpdb->prepare("DELETE FROM {$wpdb->commentmeta} WHERE meta_key IN (%s,%s)", '_gcmgr_ghost', '_gcm_ghost') );
 
-    // transients (both prefixes)
+    // Transients (new + legacy)
     $patterns = [
-        '_transient_gcmgr_rate_m_%',
-        '_transient_timeout_gcmgr_rate_m_%',
-        '_transient_gcmgr_rate_h_%',
-        '_transient_timeout_gcmgr_rate_h_%',
-        '_transient_gcmgr_last_%_hash',
-        '_transient_timeout_gcmgr_last_%_hash',
-        '_transient_gcm_rate_m_%',
-        '_transient_timeout_gcm_rate_m_%',
-        '_transient_gcm_rate_h_%',
-        '_transient_timeout_gcm_rate_h_%',
-        '_transient_gcm_last_%_hash',
-        '_transient_timeout_gcm_last_%_hash',
+        '_transient_gcmgr_%', '_transient_timeout_gcmgr_%',
+        '_transient_gcm_%',   '_transient_timeout_gcm_%',
     ];
     foreach ( $patterns as $like ) {
         $wpdb->query( $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like) );
     }
 
-    // remove cache files
-    $cache_dir = trailingslashit( dirname(__FILE__) ) . 'cache';
-    if ( function_exists('wp_filesystem') === false ) {
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-    }
-    WP_Filesystem();
-    global $wp_filesystem;
-    if ( $wp_filesystem && $wp_filesystem->is_dir( $cache_dir ) ) {
-        $files = $wp_filesystem->dirlist( $cache_dir );
-        if ( is_array( $files ) ) {
-            foreach ( array_keys( $files ) as $fname ) {
-                $wp_filesystem->delete( trailingslashit( $cache_dir ) . $fname );
+    // Remove cache in uploads/
+    if ( function_exists( 'gcmgr_cache_paths' ) ) {
+        list( $dir, $file ) = gcmgr_cache_paths();
+        if ( file_exists( $file ) ) { @unlink( $file ); }
+        if ( is_dir( $dir ) ) {
+            foreach ( glob( trailingslashit( $dir ) . '*', GLOB_NOSORT ) as $f ) {
+                @unlink( $f );
             }
+            @rmdir( $dir );
         }
-        $wp_filesystem->rmdir( $cache_dir );
     }
 }
 

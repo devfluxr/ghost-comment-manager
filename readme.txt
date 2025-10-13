@@ -3,7 +3,7 @@ Contributors: devfluxr
 Tags: comments, moderation, spam, trust, ghost
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 0.1.3
+Stable tag: 0.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -288,6 +288,12 @@ No data is sent to third parties.
 
 == Changelog ==
 
+= 0.1.4 - 2025-10-13 =
+- Compliance: moved classmap cache out of the plugin folder to /wp-content/uploads/ghost-comment-manager/.
+- Writes occur only if the uploads directory is writable; no data is stored in the plugin directory.
+- Uninstall now removes the uploads cache folder as well.
+- No database changes.
+
 = 0.1.3 - 2025-10-09 =
 - Header compliance: Plugin URI and Author URI made distinct; ownership clarified for wp.org review.
 - Minor admin polish: ensured enqueue slugs/handles and column CSS align with new prefixes.
@@ -313,6 +319,9 @@ No data is sent to third parties.
 
 
 == Upgrade Notice ==
+
+= 0.1.4 =
+Moved cache storage to /wp-content/uploads/ghost-comment-manager/ to comply with wp.org guidelines. Safe to update.
 
 = 0.1.3 =
 Header compliance for wp.org (distinct URIs) and minor admin alignment. Safe to update.
