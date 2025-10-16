@@ -1,6 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
-$pro_active = class_exists('\GcmPro\Init') || defined('GCM_PRO_VERSION');
+$pro_active = class_exists('\GcmPro\Init') || defined('gcmgr_PRO_VERSION');
 $envato_url = 'https://www.google.com/search?q=ghost+comment+manager+pro+site%3Acodecanyon.net';
 ?>
 <div class="wrap gcm-wrap">

@@ -36,7 +36,7 @@ class Admin extends BaseController
         );
 
         // 2) Pro Features promo submenu — only if PRO is NOT active
-        if (!class_exists('\GcmPro\Init') && !defined('GCM_PRO_VERSION')) {
+        if (!class_exists('\GcmPro\Init') && !defined('gcmgr_PRO_VERSION')) {
             add_submenu_page(
                 'gcmgr_plugin',
                 __('Pro Features', 'ghost-comment-manager'),

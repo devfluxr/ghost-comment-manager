@@ -3,7 +3,7 @@ Contributors: devfluxr
 Tags: comments, moderation, spam, trust, ghost
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 0.1.4
+Stable tag: 0.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,28 +68,57 @@ Integrations and compatibility
 - Works with block themes and classic themes.
 - Multisite compatible on a per-site basis.
 
-== How it works (non-technical) ==
+## How it works (non-technical)
 
-Approve vs Trust
-- Approve: you approve one comment.
-- Trust: you approve the person. Future comments publish immediately and are temporarily highlighted for moderators.
+### 🧠 Approve vs Trust
+- **Approve** = you approve **one** comment only.  
+- **Trust** = you approve the **person**.  
+  Once a user is trusted, their future comments are **published instantly** (no moderation wait).  
+  - **Example:** You approve Sarah’s first few comments. After that, she’s trusted — her next comments appear immediately.
 
-Ghost indicator (moderator-only)
-- Public visitors see a normal comment.
-- Logged-in moderators see a subtle highlighted background and icon.
-- Click Confirm when you are satisfied; the highlight disappears, the comment remains published.
+---
 
-Auto-trust threshold
-- Set a number in settings (for example, 3).
-- When a user reaches that many approved comments, they automatically become trusted.
-- Changing the number later affects future users; it does not remove trust from people you already trusted.
+### 👻 Ghost indicator (moderator-only)
+- Trusted users’ comments publish instantly **but can be optionally “ghosted”** (hidden from public) depending on your settings.  
+- If ghosting applies:
+  - **Public visitors** do **not** see ghosted comments yet.  
+  - **Moderators** see them with a ghost icon 👻 or colored background.  
+  - When you click **“Confirm (remove ghost)”**, the comment becomes visible to everyone.  
 
-Role exclusions
-- Choose roles that should never be ghosted (for example Administrators or Editors). Their comments still publish, but without the moderator highlight.
+**Example:**  
+John is a trusted user. His comment posts immediately but shows a ghost icon only moderators see.  
+You review and click **Confirm** → it’s now public and the ghost mark disappears.
 
-Shield Lite
-- Blocks common spam patterns quietly before they hit your queue.
-- Defaults are safe; you can adjust limits and rules to fit your site.
+If the user’s role is excluded in settings (for example, “Subscriber”), their comments publish **publicly right away** with **no ghost step**.
+
+---
+
+### ⚙️ Auto-trust threshold
+- In **Settings → Ghost Comment Manager → General**, set **Auto-trust after X approvals**.  
+  **Example:** set it to **3**.  
+  - When any commenter reaches **3 approved comments**, the plugin automatically trusts them.  
+  - Their future comments post instantly without waiting for moderation.  
+- Changing this number later affects **new users only**; existing trusted users stay trusted.
+
+---
+
+### 🔐 Role exclusions (no ghosting)
+- Choose which roles should **never** be ghosted.  
+  **Example:** check **Administrator** and **Editor**.  
+  - Comments by these roles will always publish normally — no ghosting, no confirmation step.  
+  - This ensures your staff or editors aren’t delayed or hidden from public view.
+
+---
+
+### 🛡️ Shield Lite (Spam / Abuse Guard)
+- Works quietly in the background to stop obvious spam before it reaches your moderation queue.  
+- Uses:
+  - **Honeypot field** to trap bots  
+  - **Minimum submit time** (prevents instant spam posts)  
+  - **Rate limits**, **link limits**, and **keyword blocklist**  
+- The default settings are safe and balanced.  
+  You can fine-tune them anytime to match your community’s needs.
+
 
 == Step-by-step setup ==
 
@@ -288,46 +317,21 @@ No data is sent to third parties.
 
 == Changelog ==
 
-= 0.1.4 - 2025-10-13 =
-- Compliance: moved classmap cache out of the plugin folder to /wp-content/uploads/ghost-comment-manager/.
-- Writes occur only if the uploads directory is writable; no data is stored in the plugin directory.
-- Uninstall now removes the uploads cache folder as well.
-- No database changes.
-
-= 0.1.3 - 2025-10-09 =
-- Header compliance: Plugin URI and Author URI made distinct; ownership clarified for wp.org review.
-- Minor admin polish: ensured enqueue slugs/handles and column CSS align with new prefixes.
-- No database changes.
-
-= 0.1.2 - 2025-10-08 =
-- Namespacing & prefixes: moved to `Devfluxr\Gcmgr\…` and standardized all WP-visible identifiers to `gcmgr_*`.
-- Security: added `ABSPATH` guards to all executable PHP files (including templates).
-- Uninstall: safe cleanup for both legacy `gcm_*` and new `gcmgr_*` keys; multisite-aware.
-- Packaging: removed wp.org directory assets (banners/icons/screens) from the plugin ZIP (to be added via SVN `/assets/` after approval).
-- Admin: fixed menu slugs and asset handles to match new prefixes.
-
-= 0.1.0 - 2025-10-01 =
-- Initial release.
-- Trust / Untrust workflow and auto-trust threshold.
-- Ghosted auto-publish with one-click Confirm.
-- Role exclusions and indicator customization.
-- Shield Lite: honeypot, minimum submit time, rate limits, link limit, keyword/regex blocklist, auto-close, min/max length, duplicate protection.
-- Comment-screen filters for Pending (New Users) and Ghost (Trusted).
-- Bulk actions (Trust / Untrust user of selected comments).
-- Trust from the User Profile screen.
-- Dashboard with metrics and Pro preview.
-
+= 0.1.0 =
+- Initial release
+- Trust / Untrust workflow and auto-trust threshold
+- Ghosted auto-publish with one-click Confirm
+- Role exclusions and indicator customization
+- Shield Lite: honeypot, minimum submit time, rate limits, link limit, keyword/regex blocklist, auto-close, min/max length, duplicate protection
+- Comment-screen filters for Pending (New Users) and Ghost (Trusted)
+- Bulk actions (Trust / Untrust user of selected comments)
+- Trust from the User Profile screen
+- Dashboard with metrics and Pro preview
 
 == Upgrade Notice ==
 
-= 0.1.4 =
-Moved cache storage to /wp-content/uploads/ghost-comment-manager/ to comply with wp.org guidelines. Safe to update.
-
-= 0.1.3 =
-Header compliance for wp.org (distinct URIs) and minor admin alignment. Safe to update.
-
-= 0.1.2 =
-Major internal refactor (namespaces/prefixes), security guards, uninstall safety, and packaging fixes. Recommended update.
+= 0.1.0 =
+First public release with trusted workflow, ghost confirmation, Shield Lite, filters, bulk actions, user-profile control, and a dashboard.
 
 == Roadmap / Pro ==
 

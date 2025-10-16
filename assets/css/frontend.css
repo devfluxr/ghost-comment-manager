@@ -4,3 +4,14 @@
   padding: 8px 10px;
   border-radius: 6px;
 }
+/* Friendly inline error/notice above the comment form */
+.gcmgr-notice{
+  background:#fff3f3;
+  border:1px solid #f0c2c2;
+  color:#7a1f1f;
+  padding:10px 12px;
+  border-radius:6px;
+  margin:10px 0 14px 0;
+  font-size:14px;
+  line-height:1.4;
+}
